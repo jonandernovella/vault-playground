@@ -1,0 +1,38 @@
+- name: create vault-config folder
+  file:
+    path: '{{ vagrant_home }}/vault-config'
+    state: directory
+    mode: 0755
+
+- name: get vault
+  get_url:
+    url: https://releases.hashicorp.com/vault/{{ vault_version }}/vault_{{ vault_version }}_linux_amd64.zip 
+    dest: '/tmp/'
+
+- name: unarchive vault
+  become: true
+  unarchive:
+    src: '/tmp/vault_{{ vault_version }}_linux_amd64.zip' 
+    dest: '/usr/local/bin'
+    mode: 0755
+    remote_src: true
+
+- name: add namespace for vault services
+  shell:
+    cmd: |
+      cat << EOF > {{ vagrant_home }}/vault-config/namespaces.yml
+      ---
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: vault
+        labels:
+          role: vault
+      EOF
+      kubectl apply -f {{ vagrant_home }}/vault-config/namespaces.yml
+
+- name: clone vault repo
+  shell: git clone -b 'v0.3.3' https://github.com/hashicorp/vault-helm.git {{ vagrant_home }}/vault-config/vault-chart 
+  args:
+    executable: /bin/bash
+  retries: 10

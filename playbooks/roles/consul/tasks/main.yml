@@ -1,0 +1,38 @@
+- name: create consul-config folder
+  file:
+    path: '{{ vagrant_home }}/consul-config'
+    state: directory
+    mode: 0755
+
+- name: get consul
+  get_url:
+    url: https://releases.hashicorp.com/consul/{{ consul_version }}/consul_{{ consul_version }}_linux_amd64.zip 
+    dest: '/tmp/'
+
+- name: unarchive consul
+  become: true
+  unarchive:
+    src: '/tmp/consul_{{ consul_version }}_linux_amd64.zip' 
+    dest: '/usr/local/bin'
+    mode: 0755
+    remote_src: true
+
+- name: add namespace for consul services
+  shell:
+    cmd: |
+      cat << EOF > {{ vagrant_home }}/consul-config/namespaces.yml
+      ---
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: consul
+        labels:
+          role: consul
+      EOF
+      kubectl apply -f {{ vagrant_home }}/consul-config/namespaces.yml
+
+- name: clone consul repo
+  shell: git clone -b 'v0.16.2' https://github.com/hashicorp/consul-helm.git {{ vagrant_home }}/consul-config/consul-chart 
+  args:
+    executable: /bin/bash
+  retries: 10

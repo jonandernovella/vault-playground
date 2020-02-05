@@ -1,0 +1,145 @@
+ #Available parameters and their default values for the Vault chart.
+
+global:
+  enabled: true
+  imagePullSecrets: []
+  tlsDisable: true
+  pspEnable: false
+
+injector:
+  enabled: false
+
+  image:
+    repository: "hashicorp/vault-k8s"
+    tag: "0.1.2"
+    pullPolicy: IfNotPresent
+
+  agentImage:
+    repository: "vault"
+    tag: "1.3.1"
+
+  namespaceSelector: {}
+
+  certs:
+    secretName: null
+    caBundle: ""
+    certName: tls.crt
+    keyName: tls.key
+
+  resources: {}
+
+server:
+  image:
+    repository: "vault"
+    tag: "1.3.1"
+    pullPolicy: IfNotPresent
+
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 250m
+    limits:
+      memory: 256Mi
+      cpu: 250m
+
+  ingress:
+    enabled: false
+
+  authDelegator:
+    enabled: true
+
+  extraContainers: null
+
+  extraArgs: ""
+
+  readinessProbe:
+    enabled: true
+  livenessProbe:
+    enabled: false
+    path: "/v1/sys/health?standbyok=true"
+    initialDelaySeconds: 60
+
+  extraEnvironmentVars: {}
+
+  extraSecretEnvironmentVars: []
+
+  #extraVolumes:
+  #  - type: secret
+  #    name: vault-consul
+
+  tolerations: {}
+
+  nodeSelector: {}
+
+  extraLabels: {}
+
+  annotations: {}
+
+  service:
+    enabled: true
+    type: "NodePort"
+    port: 8200
+    targetPort: 8200
+    annotations: {}
+
+  dataStorage:
+    enabled: false
+    size: 10Gi
+    storageClass: null
+    accessMode: ReadWriteOnce
+
+  auditStorage:
+    enabled: true
+    size: 2Gi
+    storageClass: null
+    accessMode: ReadWriteOnce
+
+  dev:
+    enabled: false
+
+  standalone:
+    enabled: false
+
+    config: |
+      ui = true
+
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "file" {
+        path = "/vault/data"
+      }
+
+  ha:
+    enabled: true
+    replicas: 1
+        # config is a raw string of default configuration when using a Stateful
+    # deployment. Default is to use a Consul for its HA storage backend.
+    # This should be HCL.
+    config: |
+      ui = true
+
+      listener "tcp" {
+        tls_disable = 1
+        address = "[::]:8200"
+        cluster_address = "[::]:8201"
+      }
+      storage "consul" {
+        path = "vault/"
+        address = "HOST_IP:8500"
+        scheme = "http"
+        disable_registration = "true"
+      }
+
+  serviceAccount:
+    annotations: {}
+
+# Vault UI
+ui:
+  enabled: true
+  serviceType: "NodePort"
+  serviceNodePort: 30394
+  externalPort: 8200
+  annotations: {}
