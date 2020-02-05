@@ -6,7 +6,7 @@ This box contains an environment for running Vault using Consul as storage backe
 
 Using helm, please run:
 ```bash
-helm upgrade --install -f /vagrant/vault-values.yaml vault-test vault-config/vault-chart/
+helm upgrade --install -f /vagrant/vault-values.yaml vault-test vault-config/vault-chart
 helm upgrade --install -f /vagrant/consul-values.yaml consul-test consul-config/consul-chart
 ```
 
@@ -28,4 +28,4 @@ Note that you need to run it three times, as the key threshold is 3. It is possi
 vault operator rekey
 ```
 
-The Consul and Vault UI can be accessed at http://127.0.0.1:30393 and http:127.0.0.1:30394 respectively.
+The Consul and Vault UI can be accessed at http://127.0.0.1:30393 and http://127.0.0.1:30394 respectively.
