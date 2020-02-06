@@ -79,6 +79,7 @@ server:
     enabled: true
     type: "NodePort"
     port: 8200
+    nodePort: 32222
     targetPort: 8200
     annotations: {}
 

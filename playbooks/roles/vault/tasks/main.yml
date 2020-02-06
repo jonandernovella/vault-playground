@@ -17,6 +17,12 @@
     mode: 0755
     remote_src: true
 
+- name: export vault address
+  shell: |
+    echo 'export VAULT_ADDR=http://127.0.0.1:32222' >> {{ vagrant_home }}/.profile
+  args:
+    executable: /bin/bash
+
 - name: add namespace for vault services
   shell:
     cmd: |
